@@ -11,6 +11,7 @@ import SigninScreen from './screens/SigninScreen';
 
 import { CarritoProvider } from './context/CarritoContext';
 import { AuthProvider, AuthContext } from './context/AuthContext';
+import AnalisisEmociones from './screens/AnalisisEmociones';
 
 const Stack = createNativeStackNavigator();
 
@@ -23,6 +24,7 @@ function Rutas() {
         <>
           <Stack.Screen name="Inicio" component={HomeScreen} />
           <Stack.Screen name="Analisis" component={AnalisisScreen} />
+          <Stack.Screen name="AnalisisEmociones" component={AnalisisEmociones} />
           <Stack.Screen name="Detalle" component={DetalleScreen} />
           <Stack.Screen name="Carrito" component={CarritoScreen} />
         </>

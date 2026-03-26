@@ -65,10 +65,10 @@ export default function AnalisisScreen({ navigation }) {
   const { usuario } = useContext(AuthContext);
 
   const emociones = [
-    { nombre: 'Enojado', pct: '5%',  color: SALMON,     icono: 'sad-outline',     textColor: '#fff' },
-    { nombre: 'Triste',  pct: '35%', color: PURPLE_DARK, icono: 'sad-outline',     textColor: '#fff' },
-    { nombre: 'Feliz',   pct: '30%', color: PINK,        icono: 'happy-outline',   textColor: '#fff' },
-    { nombre: 'Calmado', pct: '10%', color: '#B8D4F0',   icono: 'happy-outline',   textColor: '#4a6fa5' },
+    { nombre: 'Enojado', pct: '5%', color: SALMON, icono: 'sad-outline', textColor: '#fff' },
+    { nombre: 'Triste', pct: '35%', color: PURPLE_DARK, icono: 'sad-outline', textColor: '#fff' },
+    { nombre: 'Feliz', pct: '30%', color: PINK, icono: 'happy-outline', textColor: '#fff' },
+    { nombre: 'Calmado', pct: '10%', color: '#B8D4F0', icono: 'happy-outline', textColor: '#4a6fa5' },
   ];
 
   return (
@@ -140,20 +140,22 @@ export default function AnalisisScreen({ navigation }) {
           {/* Botones de acción */}
           <View style={styles.botonesContainer}>
             <TouchableOpacity style={styles.boton}>
-              <Text style={styles.botonTexto}>analizar metas  ›</Text>
+              <Text style={styles.botonTexto}>Analizar Metas  ›</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.boton}>
+            <TouchableOpacity style={styles.boton} onPress={() => navigation.navigate('AnalisisEmociones')}>
+              <Text style={styles.botonTexto}>Analizar Emociones  ›</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.boton} >
               <Ionicons name="download-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
-              <Text style={styles.botonTexto}>descargar PDF</Text>
+              <Text style={styles.botonTexto}>Descargar PDF</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.boton}>
-              <Text style={styles.botonTexto}>analizar emociones  ›</Text>
-            </TouchableOpacity>
           </View>
 
         </ScrollView>
+
 
         {/* Bottom Nav */}
         <View style={styles.bottomNav}>
@@ -162,7 +164,7 @@ export default function AnalisisScreen({ navigation }) {
             <Text style={styles.navLabel}>HOME</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.navItem}>
+          <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Analisis')}>
             <Ionicons name="bar-chart" size={24} color={PURPLE} />
             <Text style={styles.navLabelActivo}>ANÁLISIS</Text>
           </TouchableOpacity>
