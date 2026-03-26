@@ -62,12 +62,12 @@ export default function HomeScreen({ navigation }) {
             <Text style={styles.navLabel}>ANÁLISIS</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.navItem}>
+          <TouchableOpacity style={styles.navItem}onPress={() => navigation.navigate('Emociones')}>
             <Ionicons name="happy-outline" size={24} color={PURPLE} />
             <Text style={styles.navLabel}>EMOCIONES</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.navItem}>
+          <TouchableOpacity style={styles.navItem}onPress={() => navigation.navigate('Metas')}>
             <Ionicons name="flag-outline" size={24} color={PURPLE} />
             <Text style={styles.navLabel}>METAS</Text>
           </TouchableOpacity>

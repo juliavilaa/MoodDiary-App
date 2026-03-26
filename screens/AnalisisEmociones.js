@@ -1,15 +1,11 @@
 import React, { useState, useContext } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  SafeAreaView,
-  ScrollView,
-  Dimensions,
+  View, Text, StyleSheet, TouchableOpacity,
+  SafeAreaView, ScrollView, Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { AuthContext } from '../context/AuthContext';
+import { AuthContext }      from '../context/AuthContext';
+import { EmocionesContext } from '../context/EmocionesContext'; // 👈
 import { Ionicons } from '@expo/vector-icons';
 import Svg, { Rect, Circle, Text as SvgText, G } from 'react-native-svg';
 
@@ -21,50 +17,17 @@ const PINK         = '#F0A0B0';
 const BLUE_LIGHT   = '#B8D4F0';
 const GREEN_LIGHT  = '#A8D8B0';
 
-const SCREEN_W = Dimensions.get('window').width;
-
-// ── Datos de ejemplo ───────────────────────────────────────────────────────
-const EMOCIONES = [
-  { nombre: 'Triste',    pct: 35, color: PURPLE,      icono: 'sad-outline',       textColor: '#fff' },
-  { nombre: 'Feliz',     pct: 30, color: PINK,        icono: 'happy-outline',     textColor: '#fff' },
-  { nombre: 'Enojado',   pct: 20, color: SALMON,      icono: 'thunderstorm-outline', textColor: '#fff' },
-  { nombre: 'Calmado',   pct: 10, color: BLUE_LIGHT,  icono: 'partly-sunny-outline', textColor: '#4a6fa5' },
-  { nombre: 'Ansioso',   pct: 5,  color: GREEN_LIGHT, icono: 'alert-circle-outline', textColor: '#3a7a45' },
-];
-
-const SEMANA = [
-  { dia: 'L', valores: { Triste: 40, Feliz: 20, Enojado: 30, Calmado: 10 } },
-  { dia: 'M', valores: { Triste: 20, Feliz: 50, Enojado: 10, Calmado: 20 } },
-  { dia: 'X', valores: { Triste: 30, Feliz: 30, Enojado: 25, Calmado: 15 } },
-  { dia: 'J', valores: { Triste: 15, Feliz: 60, Enojado: 5,  Calmado: 20 } },
-  { dia: 'V', valores: { Triste: 35, Feliz: 25, Enojado: 30, Calmado: 10 } },
-  { dia: 'S', valores: { Triste: 10, Feliz: 70, Enojado: 10, Calmado: 10 } },
-  { dia: 'D', valores: { Triste: 25, Feliz: 40, Enojado: 20, Calmado: 15 } },
-];
-
-const COLORES_BARRA = [PURPLE, PINK, SALMON, BLUE_LIGHT];
-const EMOCION_KEYS  = ['Triste', 'Feliz', 'Enojado', 'Calmado'];
-
-const HISTORIAL = [
-  { fecha: 'Hoy',      emocion: 'Feliz',   icono: 'happy-outline',        color: PINK        },
-  { fecha: 'Ayer',     emocion: 'Triste',  icono: 'sad-outline',          color: PURPLE      },
-  { fecha: 'Lun',      emocion: 'Calmado', icono: 'partly-sunny-outline', color: BLUE_LIGHT  },
-  { fecha: 'Dom',      emocion: 'Enojado', icono: 'thunderstorm-outline', color: SALMON      },
-  { fecha: 'Sáb',      emocion: 'Feliz',   icono: 'happy-outline',        color: PINK        },
-];
-
-// ── Donut grande ───────────────────────────────────────────────────────────
-function DonutGrande() {
+// ── Donut dinámico ─────────────────────────────────────────────────────────
+function DonutDinamico({ emociones }) {
   const cx = 110, cy = 110, r = 85, stroke = 28;
   const circum = 2 * Math.PI * r;
-  const colores = [PURPLE, PINK, SALMON, BLUE_LIGHT, GREEN_LIGHT];
 
   let acumulado = 0;
-  const arcos = EMOCIONES.map((e, i) => {
+  const arcos = emociones.map((e) => {
     const offset    = circum * (1 - acumulado);
     const dasharray = `${circum * (e.pct / 100)} ${circum * (1 - e.pct / 100)}`;
     acumulado += e.pct / 100;
-    return { ...e, offset, dasharray, color: colores[i] };
+    return { ...e, offset, dasharray };
   });
 
   return (
@@ -93,39 +56,36 @@ function DonutGrande() {
   );
 }
 
-// ── Barras apiladas semanales ──────────────────────────────────────────────
-function BarrasApiladas() {
-  const barW  = 28;
-  const gap   = 18;
-  const h     = 130;
-  const total = SEMANA.length;
-  const svgW  = total * (barW + gap);
+// ── Barras por día de la semana ────────────────────────────────────────────
+function BarrasDinamicas({ registrosPorDia, emocionesUnicas }) {
+  const dias   = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+  const barW   = 28, gap = 18, h = 130;
+  const svgW   = dias.length * (barW + gap);
 
   return (
     <Svg width="100%" height={h + 24} viewBox={`0 0 ${svgW} ${h + 24}`}>
-      {SEMANA.map((dia, i) => {
-        let yAcum = h;
-        const x   = i * (barW + gap) + 4;
+      {dias.map((dia, i) => {
+        const totalDia = registrosPorDia[dia] || 0;
+        const x = i * (barW + gap) + 4;
+
+        // Si no hay registros ese día, dibuja barra vacía
+        if (totalDia === 0) {
+          return (
+            <G key={i}>
+              <Rect x={x} y={h - 4} width={barW} height={4} fill={PURPLE_LIGHT} rx={4} />
+              <SvgText x={x + barW / 2} y={h + 16} textAnchor="middle" fontSize={11} fill="#888">
+                {dia}
+              </SvgText>
+            </G>
+          );
+        }
+
+        const barH = Math.min((totalDia / 5) * h, h); // escala: max 5 registros = barra llena
         return (
           <G key={i}>
-            {EMOCION_KEYS.map((key, j) => {
-              const barH = (dia.valores[key] / 100) * h;
-              yAcum -= barH;
-              return (
-                <Rect
-                  key={j}
-                  x={x} y={yAcum}
-                  width={barW} height={barH}
-                  fill={COLORES_BARRA[j]}
-                  rx={j === 0 ? 6 : 0}
-                />
-              );
-            })}
-            <SvgText
-              x={x + barW / 2} y={h + 16}
-              textAnchor="middle" fontSize={11} fill="#888"
-            >
-              {dia.dia}
+            <Rect x={x} y={h - barH} width={barW} height={barH} fill={PURPLE} rx={6} />
+            <SvgText x={x + barW / 2} y={h + 16} textAnchor="middle" fontSize={11} fill="#888">
+              {dia}
             </SvgText>
           </G>
         );
@@ -134,7 +94,7 @@ function BarrasApiladas() {
   );
 }
 
-// ── Filtro de período ──────────────────────────────────────────────────────
+// ── Filtro ─────────────────────────────────────────────────────────────────
 function FiltroPeriodo({ activo, onChange }) {
   const opciones = ['Semana', 'Mes', 'Año'];
   return (
@@ -156,10 +116,73 @@ function FiltroPeriodo({ activo, onChange }) {
 
 // ── Pantalla principal ─────────────────────────────────────────────────────
 export default function AnalisisEmociones({ navigation }) {
-  const { usuario }    = useContext(AuthContext);
+  const { usuario }   = useContext(AuthContext);
+  const { registros } = useContext(EmocionesContext); // 👈 datos reales
   const [periodo, setPeriodo] = useState('Semana');
 
-  const emocionTop = EMOCIONES.reduce((a, b) => a.pct > b.pct ? a : b);
+  // 1. Contar cuántas veces aparece cada emoción
+  const conteo = {};
+  registros.forEach(r => {
+    conteo[r.emocion] = (conteo[r.emocion] || 0) + 1;
+  });
+
+  // 2. Construir array de emociones con porcentaje real
+  const total = registros.length;
+  const emocionesCalculadas = Object.entries(conteo).map(([nombre, cant]) => {
+    const registro = registros.find(r => r.emocion === nombre);
+    return {
+      nombre,
+      cant,
+      pct: total > 0 ? Math.round((cant / total) * 100) : 0,
+      color: registro?.color || PURPLE,
+      icono: registro?.icono || 'help-outline',
+      textColor: registro?.textColor || '#fff',
+    };
+  }).sort((a, b) => b.pct - a.pct); // ordenar de mayor a menor
+
+  // 3. Emoción dominante
+  const emocionTop = emocionesCalculadas[0] || null;
+
+  // 4. Registros por día de la semana (para la gráfica)
+  const DIAS_MAP = { 'Hoy': 'D', 'Ayer': 'S', 'Lun': 'L', 'Mar': 'M', 'Mié': 'X', 'Jue': 'J', 'Vie': 'V', 'Sáb': 'S', 'Dom': 'D' };
+  const registrosPorDia = {};
+  registros.forEach(r => {
+    const dia = DIAS_MAP[r.fecha] || 'D';
+    registrosPorDia[dia] = (registrosPorDia[dia] || 0) + 1;
+  });
+
+  // 5. Historial reciente (últimos 5)
+  const historialReciente = registros.slice(0, 5);
+
+  if (total === 0) {
+    return (
+      <LinearGradient
+        colors={['#f5e0ff', '#ffffff', '#e4d2ec', '#ffffff']}
+        start={{ x: 0.3, y: 0 }} end={{ x: 0.7, y: 1 }}
+        style={styles.background}
+      >
+        <SafeAreaView style={styles.safeArea}>
+          <View style={styles.header}>
+            <View style={styles.headerLeft}>
+              <Ionicons name="star-outline" size={26} color={PURPLE} style={styles.starIcon} />
+              <Text style={styles.nombreUsuario}>{usuario?.nombre || 'Usuario'}</Text>
+            </View>
+            <TouchableOpacity>
+              <Ionicons name="notifications-outline" size={26} color={PURPLE} />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.vacioCentrado}>
+            <Ionicons name="happy-outline" size={60} color={PURPLE_LIGHT} />
+            <Text style={styles.vacioTitulo}>Aún no hay datos</Text>
+            <Text style={styles.vacioSub}>Registra tus primeras emociones para ver el análisis aquí.</Text>
+            <TouchableOpacity style={styles.vacioBoton} onPress={() => navigation.navigate('Emociones')}>
+              <Text style={styles.vacioBotonTexto}>Ir a Emociones</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </LinearGradient>
+    );
+  }
 
   return (
     <LinearGradient
@@ -181,17 +204,15 @@ export default function AnalisisEmociones({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
-        >
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+
           {/* Back + título */}
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backRow}>
             <Ionicons name="chevron-back" size={20} color={PURPLE} />
             <Text style={styles.backTexto}>Análisis</Text>
           </TouchableOpacity>
           <Text style={styles.tituloSeccion}>Análisis de Emociones</Text>
-          <Text style={styles.subtituloSeccion}>Tu estado emocional de la semana</Text>
+          <Text style={styles.subtituloSeccion}>Basado en {total} registros</Text>
 
           {/* Filtro */}
           <FiltroPeriodo activo={periodo} onChange={setPeriodo} />
@@ -200,56 +221,52 @@ export default function AnalisisEmociones({ navigation }) {
           <View style={styles.tarjetasRow}>
             <View style={[styles.tarjetaRapida, { backgroundColor: PURPLE + '18' }]}>
               <Ionicons name="analytics-outline" size={22} color={PURPLE_DARK} />
-              <Text style={styles.tarjetaNum}>5</Text>
-              <Text style={styles.tarjetaLabel}>Emociones{'\n'}registradas</Text>
+              <Text style={styles.tarjetaNum}>{emocionesCalculadas.length}</Text>
+              <Text style={styles.tarjetaLabel}>Tipos de{'\n'}emoción</Text>
             </View>
+
             <View style={[styles.tarjetaRapida, { backgroundColor: PINK + '40' }]}>
-              <Ionicons name={emocionTop.icono} size={22} color={PURPLE_DARK} />
-              <Text style={styles.tarjetaNum}>{emocionTop.pct}%</Text>
+              <Ionicons name={emocionTop?.icono || 'help-outline'} size={22} color={PURPLE_DARK} />
+              <Text style={styles.tarjetaNum}>{emocionTop?.pct || 0}%</Text>
               <Text style={styles.tarjetaLabel}>Emoción{'\n'}dominante</Text>
             </View>
+
             <View style={[styles.tarjetaRapida, { backgroundColor: SALMON + '20' }]}>
-              <Ionicons name="calendar-outline" size={22} color={SALMON} />
-              <Text style={[styles.tarjetaNum, { color: SALMON }]}>7</Text>
-              <Text style={styles.tarjetaLabel}>Días{'\n'}registrados</Text>
+              <Ionicons name="list-outline" size={22} color={SALMON} />
+              <Text style={[styles.tarjetaNum, { color: SALMON }]}>{total}</Text>
+              <Text style={styles.tarjetaLabel}>Total{'\n'}registros</Text>
             </View>
           </View>
 
-          {/* Donut grande */}
+          {/* Donut */}
           <View style={styles.card}>
             <Text style={styles.cardTitulo}>Distribución de emociones</Text>
-            <View style={styles.donutContainer}>
-              <DonutGrande />
-              <View style={styles.donutLeyenda}>
-                {EMOCIONES.map((e, i) => (
-                  <View key={i} style={styles.leyendaFila}>
-                    <View style={[styles.leyendaDot, { backgroundColor: e.color }]} />
-                    <Text style={styles.leyendaTexto}>{e.nombre}</Text>
-                    <Text style={styles.leyendaPct}>{e.pct}%</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-          </View>
-
-          {/* Barras apiladas */}
-          <View style={styles.card}>
-            <Text style={styles.cardTitulo}>Evolución semanal</Text>
-            <BarrasApiladas />
-            <View style={styles.barrasLeyenda}>
-              {EMOCION_KEYS.map((key, i) => (
-                <View key={i} style={styles.leyendaFila}>
-                  <View style={[styles.leyendaDot, { backgroundColor: COLORES_BARRA[i] }]} />
-                  <Text style={styles.leyendaTexto}>{key}</Text>
+            {emocionesCalculadas.length > 0 && (
+              <View style={styles.donutContainer}>
+                <DonutDinamico emociones={emocionesCalculadas} />
+                <View style={styles.donutLeyenda}>
+                  {emocionesCalculadas.map((e, i) => (
+                    <View key={i} style={styles.leyendaFila}>
+                      <View style={[styles.leyendaDot, { backgroundColor: e.color }]} />
+                      <Text style={styles.leyendaTexto}>{e.nombre}</Text>
+                      <Text style={styles.leyendaPct}>{e.pct}% ({e.cant})</Text>
+                    </View>
+                  ))}
                 </View>
-              ))}
-            </View>
+              </View>
+            )}
           </View>
 
-          {/* Cards emociones individuales */}
+          {/* Barras por día */}
+          <View style={styles.card}>
+            <Text style={styles.cardTitulo}>Registros por día</Text>
+            <BarrasDinamicas registrosPorDia={registrosPorDia} />
+          </View>
+
+          {/* Grid emociones */}
           <Text style={styles.cardTitulo}>Detalle por emoción</Text>
           <View style={styles.emocionesGrid}>
-            {EMOCIONES.map((e, i) => (
+            {emocionesCalculadas.map((e, i) => (
               <View key={i} style={[styles.emocionCard, { backgroundColor: e.color }]}>
                 <Ionicons name={e.icono} size={26} color={e.textColor} />
                 <Text style={[styles.emocionNombre, { color: e.textColor }]}>{e.nombre}</Text>
@@ -268,22 +285,17 @@ export default function AnalisisEmociones({ navigation }) {
           <View style={styles.card}>
             <Text style={styles.cardTitulo}>Historial reciente</Text>
             <View style={styles.historialLista}>
-              {HISTORIAL.map((h, i) => (
+              {historialReciente.map((h, i) => (
                 <View key={i} style={styles.historialItem}>
                   <View style={[styles.historialIconoBg, { backgroundColor: h.color + '30' }]}>
-                    <Ionicons name={h.icono} size={18}
-                      color={h.color === BLUE_LIGHT ? '#4a6fa5' : h.color} />
+                    <Ionicons name={h.icono} size={18} color={h.color} />
                   </View>
                   <View style={styles.historialInfo}>
                     <Text style={styles.historialEmocion}>{h.emocion}</Text>
-                    <Text style={styles.historialFecha}>{h.fecha}</Text>
+                    <Text style={styles.historialFecha} numberOfLines={1}>{h.descripcion}</Text>
                   </View>
                   <View style={[styles.historialPill, { backgroundColor: h.color + '30' }]}>
-                    <Text style={[styles.historialPillTexto, {
-                      color: h.color === BLUE_LIGHT ? '#4a6fa5' : h.color
-                    }]}>
-                      registrado
-                    </Text>
+                    <Text style={[styles.historialPillTexto, { color: h.color }]}>{h.fecha}</Text>
                   </View>
                 </View>
               ))}
@@ -299,14 +311,14 @@ export default function AnalisisEmociones({ navigation }) {
             <Text style={styles.navLabel}>HOME</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Analisis')}>
-            <Ionicons name="bar-chart-outline" size={24} color={PURPLE} />
-            <Text style={styles.navLabel}>ANÁLISIS</Text>
+            <Ionicons name="bar-chart" size={24} color={PURPLE} />
+            <Text style={styles.navLabelActivo}>ANÁLISIS</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Ionicons name="happy" size={24} color={PURPLE} />
-            <Text style={styles.navLabelActivo}>EMOCIONES</Text>
+          <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Emociones')}>
+            <Ionicons name="happy-outline" size={24} color={PURPLE} />
+            <Text style={styles.navLabel}>EMOCIONES</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
+          <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Metas')}>
             <Ionicons name="flag-outline" size={24} color={PURPLE} />
             <Text style={styles.navLabel}>METAS</Text>
           </TouchableOpacity>
@@ -316,7 +328,6 @@ export default function AnalisisEmociones({ navigation }) {
     </LinearGradient>
   );
 }
-
 const styles = StyleSheet.create({
   background:    { flex: 1 },
   safeArea:      { flex: 1 },

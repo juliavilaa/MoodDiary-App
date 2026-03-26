@@ -139,10 +139,7 @@ export default function AnalisisScreen({ navigation }) {
 
           {/* Botones de acción */}
           <View style={styles.botonesContainer}>
-            <TouchableOpacity style={styles.boton}>
-              <Text style={styles.botonTexto}>Analizar Metas  ›</Text>
-            </TouchableOpacity>
-
+            
             <TouchableOpacity style={styles.boton} onPress={() => navigation.navigate('AnalisisEmociones')}>
               <Text style={styles.botonTexto}>Analizar Emociones  ›</Text>
             </TouchableOpacity>
@@ -169,12 +166,12 @@ export default function AnalisisScreen({ navigation }) {
             <Text style={styles.navLabelActivo}>ANÁLISIS</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.navItem}>
+          <TouchableOpacity style={styles.navItem}onPress={() =>navigation.navigate('Emociones')}>
             <Ionicons name="happy-outline" size={24} color={PURPLE} />
             <Text style={styles.navLabel}>EMOCIONES</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.navItem}>
+          <TouchableOpacity style={styles.navItem}onPress={() =>navigation.navigate('Metas')}>
             <Ionicons name="flag-outline" size={24} color={PURPLE} />
             <Text style={styles.navLabel}>METAS</Text>
           </TouchableOpacity>

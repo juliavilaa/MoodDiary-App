@@ -4,14 +4,18 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import HomeScreen from './screens/HomeScreen';
 import AnalisisScreen from './screens/AnalisisScreen';
-import DetalleScreen from './screens/DetalleScreen';
-import CarritoScreen from './screens/CarritoScreen';
+
 import LoginScreen from './screens/LoginScreen';
 import SigninScreen from './screens/SigninScreen';
-
-import { CarritoProvider } from './context/CarritoContext';
-import { AuthProvider, AuthContext } from './context/AuthContext';
+import EmocionesScreen from './screens/EmocionesScreen';
 import AnalisisEmociones from './screens/AnalisisEmociones';
+import MetasScreen from './screens/MetasScreen';
+
+
+import { AuthProvider, AuthContext } from './context/AuthContext';
+import { EmocionesProvider } from './context/EmocionesContext';
+import { MetasProvider } from './context/MetasContext';
+
 
 const Stack = createNativeStackNavigator();
 
@@ -25,8 +29,8 @@ function Rutas() {
           <Stack.Screen name="Inicio" component={HomeScreen} />
           <Stack.Screen name="Analisis" component={AnalisisScreen} />
           <Stack.Screen name="AnalisisEmociones" component={AnalisisEmociones} />
-          <Stack.Screen name="Detalle" component={DetalleScreen} />
-          <Stack.Screen name="Carrito" component={CarritoScreen} />
+          <Stack.Screen name="Emociones" component={EmocionesScreen} />
+          <Stack.Screen name="Metas" component={MetasScreen} />
         </>
       ) : (
         <>
@@ -41,11 +45,13 @@ function Rutas() {
 export default function App() {
   return (
     <AuthProvider>
-      <CarritoProvider>
-        <NavigationContainer>
-          <Rutas />
-        </NavigationContainer>
-      </CarritoProvider>
+      <EmocionesProvider>
+        <MetasProvider>
+          <NavigationContainer>
+            <Rutas />
+          </NavigationContainer>
+        </MetasProvider>
+      </EmocionesProvider>
     </AuthProvider>
   );
 }
