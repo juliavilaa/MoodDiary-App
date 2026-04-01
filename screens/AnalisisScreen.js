@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext } from "react";
 import {
   View,
   Text,
@@ -6,30 +6,35 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import { AuthContext } from '../context/AuthContext';
-import { Ionicons } from '@expo/vector-icons';
-import Svg, { G, Path, Circle } from 'react-native-svg';
-import Header from '../components/Header';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
+import { AuthContext } from "../context/AuthContext";
+import { Ionicons } from "@expo/vector-icons";
+import Svg, { G, Path, Circle } from "react-native-svg";
+import Header from "../components/Header";
+import { EmocionesContext } from "../context/EmocionesContext";
+import { generarYCompartirPDF } from "../utils/generarPDF";
 
-const PURPLE = '#9268b8';
-const PURPLE_DARK = '#6B4F9E';
-const SALMON = '#E8857A';
-const PINK = '#F0A0B0';
+const PURPLE = "#9268b8";
+const PURPLE_DARK = "#6B4F9E";
+const SALMON = "#E8857A";
+const PINK = "#F0A0B0";
 
 // Donut chart manual con SVG
 function DonutChart() {
-  const cx = 90, cy = 90, r = 65, stroke = 22;
+  const cx = 90,
+    cy = 90,
+    r = 65,
+    stroke = 22;
   const circum = 2 * Math.PI * r;
 
   // Segmentos: triste 35%, feliz 30%, enojado 20%, otro 15%
   const segmentos = [
     { pct: 0.35, color: PURPLE },
-    { pct: 0.30, color: PINK },
-    { pct: 0.20, color: SALMON },
-    { pct: 0.15, color: '#D0C4E8' },
+    { pct: 0.3, color: PINK },
+    { pct: 0.2, color: SALMON },
+    { pct: 0.15, color: "#D0C4E8" },
   ];
 
   let acumulado = 0;
@@ -64,23 +69,55 @@ function DonutChart() {
 
 export default function AnalisisScreen({ navigation }) {
   const { usuario } = useContext(AuthContext);
+  const { registros } = useContext(EmocionesContext);
+
+  const handleDescargarPDF = async () => {
+    try {
+      await generarYCompartirPDF({ registros, usuario });
+    } catch (e) {
+      Alert.alert("Error", "No se pudo generar el PDF. Intenta de nuevo.");
+    }
+  };
 
   const emociones = [
-    { nombre: 'Enojado', pct: '5%', color: SALMON, icono: 'sad-outline', textColor: '#fff' },
-    { nombre: 'Triste', pct: '35%', color: PURPLE_DARK, icono: 'sad-outline', textColor: '#fff' },
-    { nombre: 'Feliz', pct: '30%', color: PINK, icono: 'happy-outline', textColor: '#fff' },
-    { nombre: 'Calmado', pct: '10%', color: '#B8D4F0', icono: 'happy-outline', textColor: '#4a6fa5' },
+    {
+      nombre: "Enojado",
+      pct: "5%",
+      color: SALMON,
+      icono: "sad-outline",
+      textColor: "#fff",
+    },
+    {
+      nombre: "Triste",
+      pct: "35%",
+      color: PURPLE_DARK,
+      icono: "sad-outline",
+      textColor: "#fff",
+    },
+    {
+      nombre: "Feliz",
+      pct: "30%",
+      color: PINK,
+      icono: "happy-outline",
+      textColor: "#fff",
+    },
+    {
+      nombre: "Calmado",
+      pct: "10%",
+      color: "#B8D4F0",
+      icono: "happy-outline",
+      textColor: "#4a6fa5",
+    },
   ];
 
   return (
     <LinearGradient
-      colors={['#f5e0ff', '#ffffff', '#e4d2ec', '#ffffff']}
+      colors={["#f5e0ff", "#ffffff", "#e4d2ec", "#ffffff"]}
       start={{ x: 0.3, y: 0 }}
       end={{ x: 0.7, y: 1 }}
       style={styles.background}
     >
       <SafeAreaView style={styles.safeArea}>
-
         {/* Header */}
         <Header navigation={navigation} />
 
@@ -91,7 +128,9 @@ export default function AnalisisScreen({ navigation }) {
         >
           {/* Título sección */}
           <Text style={styles.tituloSeccion}>Análisis</Text>
-          <Text style={styles.subtituloSeccion}>Resumen de tu bienestar semanal</Text>
+          <Text style={styles.subtituloSeccion}>
+            Resumen de tu bienestar semanal
+          </Text>
 
           {/* Card Donut */}
           <View style={styles.card}>
@@ -123,53 +162,73 @@ export default function AnalisisScreen({ navigation }) {
           <Text style={styles.detalleTitle}>Detalle de Emociones</Text>
           <View style={styles.emocionesRow}>
             {emociones.map((e, i) => (
-              <View key={i} style={[styles.emocionCard, { backgroundColor: e.color }]}>
+              <View
+                key={i}
+                style={[styles.emocionCard, { backgroundColor: e.color }]}
+              >
                 <Ionicons name={e.icono} size={22} color={e.textColor} />
-                <Text style={[styles.emocionPct, { color: e.textColor }]}>{e.pct}</Text>
+                <Text style={[styles.emocionPct, { color: e.textColor }]}>
+                  {e.pct}
+                </Text>
               </View>
             ))}
           </View>
 
           {/* Botones de acción */}
           <View style={styles.botonesContainer}>
-            
-            <TouchableOpacity style={styles.boton} onPress={() => navigation.navigate('AnalisisEmociones')}>
-              <Text style={styles.botonTexto}>Analizar Emociones  ›</Text>
+            <TouchableOpacity
+              style={styles.boton}
+              onPress={() => navigation.navigate("AnalisisEmociones")}
+            >
+              <Text style={styles.botonTexto}>Analizar Emociones ›</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.boton} >
-              <Ionicons name="download-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
+            <TouchableOpacity style={styles.boton} onPress={handleDescargarPDF}>
+              <Ionicons
+                name="download-outline"
+                size={16}
+                color="#fff"
+                style={{ marginRight: 6 }}
+              />
               <Text style={styles.botonTexto}>Descargar PDF</Text>
             </TouchableOpacity>
-
           </View>
-
         </ScrollView>
-
 
         {/* Bottom Nav */}
         <View style={styles.bottomNav}>
-          <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Inicio')}>
+          <TouchableOpacity
+            style={styles.navItem}
+            onPress={() => navigation.navigate("Inicio")}
+          >
             <Ionicons name="home-outline" size={24} color={PURPLE} />
             <Text style={styles.navLabel}>HOME</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Analisis')}>
+          <TouchableOpacity
+            style={styles.navItem}
+            onPress={() => navigation.navigate("Analisis")}
+          >
             <Ionicons name="bar-chart" size={24} color={PURPLE} />
             <Text style={styles.navLabelActivo}>ANÁLISIS</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.navItem}onPress={() =>navigation.navigate('Emociones')}>
+          <TouchableOpacity
+            style={styles.navItem}
+            onPress={() => navigation.navigate("Emociones")}
+          >
             <Ionicons name="happy-outline" size={24} color={PURPLE} />
             <Text style={styles.navLabel}>EMOCIONES</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.navItem}onPress={() =>navigation.navigate('Metas')}>
+          <TouchableOpacity
+            style={styles.navItem}
+            onPress={() => navigation.navigate("Metas")}
+          >
             <Ionicons name="flag-outline" size={24} color={PURPLE} />
             <Text style={styles.navLabel}>METAS</Text>
           </TouchableOpacity>
         </View>
-
       </SafeAreaView>
     </LinearGradient>
   );
@@ -184,62 +243,61 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
 
-  
   // Card donut
   card: {
-    backgroundColor: 'rgba(255,255,255,0.75)',
+    backgroundColor: "rgba(255,255,255,0.75)",
     borderRadius: 20,
     padding: 20,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 20,
     borderWidth: 0.5,
-    borderColor: 'rgba(180,130,220,0.25)',
+    borderColor: "rgba(180,130,220,0.25)",
   },
   donutWrapper: {
-    position: 'relative',
-    alignItems: 'center',
-    justifyContent: 'center',
+    position: "relative",
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 16,
   },
   donutLabel: {
-    position: 'absolute',
-    alignItems: 'center',
+    position: "absolute",
+    alignItems: "center",
   },
   donutTotal: {
     fontSize: 11,
-    fontWeight: '600',
-    color: '#888',
-    textAlign: 'center',
+    fontWeight: "600",
+    color: "#888",
+    textAlign: "center",
   },
   leyenda: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
   },
   leyendaItem: {
-    alignItems: 'center',
+    alignItems: "center",
     gap: 2,
   },
   leyendaPct: {
     fontSize: 18,
-    fontWeight: '700',
-    color: '#333',
+    fontWeight: "700",
+    color: "#333",
   },
   leyendaNombre: {
     fontSize: 11,
-    color: '#888',
+    color: "#888",
     letterSpacing: 0.5,
   },
 
   // Detalle emociones
   detalleTitle: {
     fontSize: 17,
-    fontWeight: '700',
-    color: '#333',
+    fontWeight: "700",
+    color: "#333",
     marginBottom: 12,
   },
   emocionesRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 10,
     marginBottom: 24,
   },
@@ -247,12 +305,12 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 14,
     paddingVertical: 18,
-    alignItems: 'center',
+    alignItems: "center",
     gap: 8,
   },
   emocionPct: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: "700",
   },
 
   // Botones
@@ -264,40 +322,40 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     paddingVertical: 16,
     paddingHorizontal: 20,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
   },
   botonTexto: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
     letterSpacing: 0.3,
   },
 
   // Bottom Nav
   bottomNav: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
     paddingVertical: 12,
     paddingHorizontal: 8,
     borderTopWidth: 0.5,
-    borderTopColor: 'rgba(180,130,220,0.3)',
-    backgroundColor: 'rgba(255,255,255,0.6)',
+    borderTopColor: "rgba(180,130,220,0.3)",
+    backgroundColor: "rgba(255,255,255,0.6)",
   },
   navItem: {
-    alignItems: 'center',
+    alignItems: "center",
     gap: 3,
   },
   navLabel: {
     fontSize: 10,
     color: PURPLE,
-    fontWeight: '400',
+    fontWeight: "400",
   },
   navLabelActivo: {
     fontSize: 10,
     color: PURPLE,
-    fontWeight: '700',
+    fontWeight: "700",
   },
 });
