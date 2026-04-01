@@ -4,14 +4,15 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  SafeAreaView,
   ScrollView,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AuthContext } from '../context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import Svg, { G, Path, Circle } from 'react-native-svg';
+import Header from '../components/Header';
 
 const PURPLE = '#9268b8';
 const PURPLE_DARK = '#6B4F9E';
@@ -81,15 +82,7 @@ export default function AnalisisScreen({ navigation }) {
       <SafeAreaView style={styles.safeArea}>
 
         {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <Ionicons name="star-outline" size={26} color={PURPLE} style={styles.starIcon} />
-            <Text style={styles.nombreUsuario}>{usuario?.nombre || 'Usuario'}</Text>
-          </View>
-          <TouchableOpacity>
-            <Ionicons name="notifications-outline" size={26} color={PURPLE} />
-          </TouchableOpacity>
-        </View>
+        <Header navigation={navigation} />
 
         <ScrollView
           style={styles.scroll}
@@ -191,46 +184,7 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
 
-  // Header
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 8,
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  starIcon: {
-    borderWidth: 1.5,
-    borderColor: PURPLE,
-    borderRadius: 50,
-    padding: 2,
-  },
-  nombreUsuario: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: PURPLE,
-  },
-
-  // Títulos
-  tituloSeccion: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: '#333',
-    marginTop: 8,
-  },
-  subtituloSeccion: {
-    fontSize: 13,
-    color: '#888',
-    marginBottom: 16,
-    marginTop: 2,
-  },
-
+  
   // Card donut
   card: {
     backgroundColor: 'rgba(255,255,255,0.75)',

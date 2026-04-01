@@ -4,11 +4,12 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AuthContext } from '../context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
+import Header from '../components/Header';
 
 const FRASES = [
   '"Solo un pequeño pensamiento positivo por la mañana puede cambiar todo tu día"',
@@ -32,17 +33,7 @@ export default function HomeScreen({ navigation }) {
       <SafeAreaView style={styles.safeArea}>
 
         {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <Ionicons name="star-outline" size={26} color={PURPLE} style={styles.starIcon} />
-            <Text style={styles.nombreUsuario}>
-              {usuario?.nombre || 'Usuario'}
-            </Text>
-          </View>
-          <TouchableOpacity>
-            <Ionicons name="notifications-outline" size={26} color={PURPLE} />
-          </TouchableOpacity>
-        </View>
+        <Header navigation={navigation} />
 
         {/* Frase del día */}
         <View style={styles.fraseContainer}>
@@ -86,32 +77,6 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-  },
-
-  // Header
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 8,
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  starIcon: {
-    borderWidth: 1.5,
-    borderColor: PURPLE,
-    borderRadius: 50,
-    padding: 2,
-  },
-  nombreUsuario: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: PURPLE,
   },
 
   // Frase

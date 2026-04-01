@@ -14,7 +14,7 @@ export const AuthProvider = ({ children }) => {
       (u) => u.email === email && u.password === password
     );
     if (encontrado) {
-      setUsuario({ email: encontrado.email, nombre: encontrado.nombre });
+       setUsuario({ email: encontrado.email, nombre: encontrado.nombre, edad: encontrado.edad });
       return true;
     }
     return false;
@@ -27,7 +27,6 @@ export const AuthProvider = ({ children }) => {
     }
     const nuevoUsuario = { nombre, email, password, edad };
     setUsuarios((prev) => [...prev, nuevoUsuario]);
-    setUsuario({ email, nombre });
     return true;
   };
 
