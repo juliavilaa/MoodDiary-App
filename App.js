@@ -4,11 +4,9 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import HomeScreen from "./screens/HomeScreen";
 import AnalisisScreen from "./screens/AnalisisScreen";
-
 import LoginScreen from "./screens/LoginScreen";
 import SigninScreen from "./screens/SigninScreen";
 import EmocionesScreen from "./screens/EmocionesScreen";
-import AnalisisEmociones from "./screens/AnalisisEmociones";
 import MetasScreen from "./screens/MetasScreen";
 import PerfilScreen from "./screens/PerfilScreen";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -28,10 +26,6 @@ function Rutas() {
         <>
           <Stack.Screen name="Inicio" component={HomeScreen} />
           <Stack.Screen name="Analisis" component={AnalisisScreen} />
-          <Stack.Screen
-            name="AnalisisEmociones"
-            component={AnalisisEmociones}
-          />
           <Stack.Screen name="Emociones" component={EmocionesScreen} />
           <Stack.Screen name="Metas" component={MetasScreen} />
           <Stack.Screen name="Perfil" component={PerfilScreen} />

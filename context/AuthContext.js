@@ -1,38 +1,36 @@
 import React, { createContext, useState } from 'react';
+import { usuarioService } from '../services/api';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-
   const [usuario, setUsuario] = useState(null);
-  const [usuarios, setUsuarios] = useState([
-    { email: "admin@test.com", password: "1234", nombre: "Admin", edad: "30" }
-  ]);
 
-  const login = (email, password) => {
-    const encontrado = usuarios.find(
-      (u) => u.email === email && u.password === password
-    );
-    if (encontrado) {
-       setUsuario({ email: encontrado.email, nombre: encontrado.nombre, edad: encontrado.edad });
+  const login = async (email, password) => {
+    try {
+      const res = await usuarioService.login(email, password);
+      setUsuario(res.data);
       return true;
-    }
-    return false;
-  };
-
-  const register = ({ nombre, email, password, edad }) => {
-    const yaExiste = usuarios.find((u) => u.email === email);
-    if (yaExiste) {
+    } catch (error) {
+      console.log('Error login:', error.message);
       return false;
     }
-    const nuevoUsuario = { nombre, email, password, edad };
-    setUsuarios((prev) => [...prev, nuevoUsuario]);
-    return true;
   };
 
-  const logout = () => {
-    setUsuario(null);
-  };
+  const register = async ({ nombre, email, password, edad }) => {
+    try {
+      const datos = { 
+  id: Math.floor(Math.random() * 100000), nombre, email, password, edad: parseInt(edad) 
+};
+      console.log('Enviando:', JSON.stringify(datos));
+      await usuarioService.register(datos);
+      return true;
+    } catch (error) {
+      console.log('Error registro:', error.message);
+      return false;
+    }
+};
+  const logout = () => setUsuario(null);
 
   return (
     <AuthContext.Provider value={{ usuario, login, logout, register }}>

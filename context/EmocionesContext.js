@@ -1,86 +1,66 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
+import { emocionService } from '../services/api';
+import { AuthContext } from './AuthContext';
 import { CATALOGO_EMOCIONES } from '../data/emociones';
 
 export const EmocionesContext = createContext();
 
 export const EmocionesProvider = ({ children }) => {
-  const [registros, setRegistros] = useState([
-    {
-      id: '1',
-      descripcion: 'Tengo miedo de ir a la fiesta sola',
-      emocion: 'Triste',
-      color: '#9268b8',
-      icono: 'sad-outline',
-      textColor: '#fff',
-      fecha: 'Hoy',
-    },
-    {
-      id: '2',
-      descripcion: 'Estoy feliz porque aprobé mi examen',
-      emocion: 'Feliz',
-      color: '#F0A0B0',
-      icono: 'happy-outline',
-      textColor: '#fff',
-      fecha: 'Hoy',
-    },
-    {
-      id: '3',
-      descripcion: 'Estoy enojada porque se comieron mi pan',
-      emocion: 'Enojado',
-      color: '#E8857A',
-      icono: 'thunderstorm-outline',
-      textColor: '#fff',
-      fecha: 'Ayer',
-    },
-    {
-      id: '4',
-      descripcion: 'Estoy ansiosa por el proyecto de ntd',
-      emocion: 'Ansioso',
-      color: '#A8D8B0',
-      icono: 'alert-circle-outline',
-      textColor: '#3a7a45',
-      fecha: 'Ayer',
-    },
-    {
-      id: '5',
-      descripcion: 'Estoy triste porque perdí inglés',
-      emocion: 'Triste',
-      color: '#9268b8',
-      icono: 'sad-outline',
-      textColor: '#fff',
-      fecha: 'Ayer',
-    },
-  ]);
+  const { usuario } = useContext(AuthContext);
+  const [registros, setRegistros] = useState([]);
 
-  // Agregar nueva emoción
-  const agregarEmocion = ({ descripcion, tipoEmocion }) => {
-    const catalogo = CATALOGO_EMOCIONES.find(e => e.nombre === tipoEmocion);
-    if (!catalogo) return false;
+  useEffect(() => {
+    if (usuario?.id) cargarEmociones();
+  }, [usuario]);
 
-    const nueva = {
-      id: Date.now().toString(),
-      descripcion,
-      emocion: catalogo.nombre,
-      color: catalogo.color,
-      icono: catalogo.icono,
-      textColor: catalogo.textColor,
-      fecha: 'Hoy',
-    };
-
-    setRegistros(prev => [nueva, ...prev]);
-    return true;
+  const cargarEmociones = async () => {
+    try {
+      const res = await emocionService.listar(usuario.id);
+      const mapeadas = res.data.map(e => {
+        const cat = CATALOGO_EMOCIONES.find(c => c.nombre === e.tipo) || CATALOGO_EMOCIONES[0];
+        return {
+          id: String(e.id), descripcion: e.descripcion, emocion: e.tipo,
+          color: cat.color, icono: cat.icono, textColor: cat.textColor, fecha: e.fecha
+        };
+      });
+      setRegistros(mapeadas);
+    } catch (err) {
+      console.error('Error emociones:', err.message);
+      setRegistros([]);
+    }
   };
 
-  // Eliminar emoción por id
-  const eliminarEmocion = (id) => {
-    setRegistros(prev => prev.filter(r => r.id !== id));
+  const agregarEmocion = async ({ descripcion, tipoEmocion }) => {
+    const cat = CATALOGO_EMOCIONES.find(e => e.nombre === tipoEmocion);
+    if (!cat) return false;
+    try {
+      await emocionService.crear({
+        id: Math.floor(Math.random() * 100000),
+        usuarioId: usuario.id,
+        tipo: tipoEmocion, descripcion,
+        fecha: new Date().toLocaleDateString('es-CO')
+      });
+      await cargarEmociones();
+      return true;
+    } catch (err) {
+      console.error('Error agregar emocion:', err.message);
+      return false;
+    }
   };
 
-  // Editar descripción de una emoción
-  const editarEmocion = (id, nuevaDescripcion) => {
-    setRegistros(prev =>
-      prev.map(r => r.id === id ? { ...r, descripcion: nuevaDescripcion } : r)
-    );
+  const eliminarEmocion = async (id) => {
+    try {
+      await emocionService.eliminar(id);
+      setRegistros(prev => prev.filter(r => r.id !== id));
+    } catch (err) { console.error(err); }
+  };
+
+  const editarEmocion = async (id, nuevaDescripcion) => {
+    try {
+      const registro = registros.find(r => r.id === id);
+      await emocionService.actualizar(id, { ...registro, descripcion: nuevaDescripcion });
+      setRegistros(prev => prev.map(r => r.id === id ? { ...r, descripcion: nuevaDescripcion } : r));
+    } catch (err) { console.error(err); }
   };
 
   return (
